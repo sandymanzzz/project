@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FORGE3D Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0a; --bg2: #111; --bg3: #181818;
+      --border: #252525; --text: #e8e8e8; --text2: #888; --text3: #555;
+      --accent: #c8ff00; --red: #ff4444;
+      --radius: 8px; --radius-lg: 16px;
+      --font-head: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 14px; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; font-family: var(--font-body); }
+    input, textarea, select { font-family: var(--font-body); }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* LOGIN */
+    #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; width: 380px; }
+    .login-logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: 2px; color: var(--accent); margin-bottom: 8px; }
+    .login-sub { color: var(--text3); font-size: 13px; margin-bottom: 32px; }
+    .login-err { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); color: #ff7777; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 16px; display: none; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+    .form-group label { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; color: var(--text2); text-transform: uppercase; }
+    .form-input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: var(--radius); font-size: 14px; transition: border-color 0.2s; width: 100%; }
+    .form-input:focus { outline: none; border-color: var(--accent); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+    .btn-primary { background: var(--accent); color: #000; font-family: var(--font-head); font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; padding: 12px 24px; border-radius: var(--radius); transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary.full { width: 100%; }
+    .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); font-size: 12px; padding: 10px 18px; border-radius: var(--radius); transition: all 0.2s; }
+    .btn-ghost:hover { color: var(--text); border-color: #555; }
+    .btn-danger { background: rgba(255,68,68,0.15); color: var(--red); border: 1px solid rgba(255,68,68,0.3); font-size: 12px; padding: 10px 18px; border-radius: var(--radius); transition: all 0.2s; }
+    .btn-danger:hover { background: rgba(255,68,68,0.25); }
+
+    /* LAYOUT */
+    #adminApp { display: none; min-height: 100vh; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 220px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo span { font-family: var(--font-head); font-size: 16px; font-weight: 800; letter-spacing: 2px; color: var(--text); }
+    .sidebar-logo small { display: block; font-size: 10px; color: var(--text3); letter-spacing: 1px; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .sidebar-item:hover { color: var(--text); background: var(--bg3); }
+    .sidebar-item.active { color: var(--accent); background: rgba(200,255,0,0.06); }
+    .sidebar-item svg { flex-shrink: 0; }
+    .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+    .main-content { margin-left: 220px; padding: 32px; min-height: 100vh; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .page-header h2 { font-family: var(--font-head); font-size: 24px; font-weight: 700; }
+
+    /* STATS */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+    .stat-card-val { font-family: var(--font-head); font-size: 28px; font-weight: 800; color: var(--accent); }
+    .stat-card-label { font-size: 12px; color: var(--text3); margin-top: 4px; letter-spacing: 0.5px; }
+
+    /* TABLE */
+    .table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); }
+    td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .td-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: var(--bg3); }
+    .td-name { font-weight: 600; }
+    .td-price { color: var(--accent); font-weight: 700; }
+    .td-actions { display: flex; gap: 8px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    .badge-cat { background: rgba(200,255,0,0.1); color: var(--accent); }
+    .badge-status { background: rgba(68,200,68,0.1); color: #4cb84c; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+    .modal-close { color: var(--text2); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius); background: none; transition: all 0.2s; }
+    .modal-close:hover { color: var(--text); background: var(--bg3); }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* SETTINGS */
+    .settings-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; max-width: 500px; }
+    .settings-card h3 { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg2); border: 1px solid var(--accent); color: var(--text); padding: 10px 20px; border-radius: 100px; font-size: 13px; z-index: 9999; transition: transform 0.3s; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { padding: 60px; text-align: center; color: var(--text3); }
+
+    #section-dashboard, #section-products, #section-orders, #section-settings { display: none; }
+    #section-dashboard.active, #section-products.active, #section-orders.active, #section-settings.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">FORGE3D</div>
+    <div class="login-sub">Admin Panel — Sign in to continue</div>
+    <div class="login-err" id="loginErr"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="adminEmail" class="form-input" placeholder="admin@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPassword" class="form-input" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()" />
+    </div>
+    <button class="btn-primary full" onclick="adminLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span id="adminSiteTitle">FORGE3D</span>
+      <small>ADMIN PANEL</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-item active" onclick="showSection('dashboard',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="sidebar-item" onclick="showSection('products',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/></svg>
+        Products
+      </div>
+      <div class="sidebar-item" onclick="showSection('orders',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Orders
+      </div>
+      <div class="sidebar-item" onclick="showSection('settings',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-ghost" style="width:100%" onclick="adminLogout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <div id="section-dashboard" class="active">
+      <div class="page-header"><h2>Dashboard</h2></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-card-val" id="dashProducts">–</div><div class="stat-card-label">Total Products</div></div>
+        <div class="stat-card"><div class="stat-card-val" id="dashOrders">–</div><div class="stat-card-label">Total Orders</div></div>
+        <div class="stat-card"><div class="stat-card-val" id="dashRevenue">–</div><div class="stat-card-label">Total Revenue</div></div>
+        <div class="stat-card"><div class="stat-card-val" id="dashUsers">–</div><div class="stat-card-label">Registered Users</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody id="recentOrdersTable"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="section-products">
+      <div class="page-header">
+        <h2>Products</h2>
+        <button class="btn-primary" onclick="openProductModal()">Add Product</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>3D</th><th>Actions</th></tr></thead>
+          <tbody id="productsTable"><tr><td colspan="6" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="section-orders">
+      <div class="page-header"><h2>Orders</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="ordersTable"><tr><td colspan="7" style="text-align:center;padding:32px"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="section-settings">
+      <div class="page-header"><h2>Settings</h2></div>
+      <div class="settings-card">
+        <h3>Site Configuration</h3>
+        <div class="form-group">
+          <label>Site Title</label>
+          <input type="text" id="siteTitleInput" class="form-input" placeholder="e.g. FORGE3D" />
+        </div>
+        <button class="btn-primary" onclick="saveSiteTitle()">Save Changes</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Add Product</h3>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="productId"/>
+      <div class="form-group"><label>Product Name *</label><input type="text" id="pName" class="form-input" placeholder="e.g. Industrial Chair Model"/></div>
+      <div class="form-group"><label>Price (INR) *</label><input type="number" id="pPrice" class="form-input" placeholder="e.g. 2499"/></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="pCategory" class="form-input">
+          <option value="3D Models">3D Models</option>
+          <option value="Textures">Textures</option>
+          <option value="Physical">Physical</option>
+          <option value="Bundles">Bundles</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="pDesc" class="form-input" rows="3" placeholder="Describe the product..."></textarea></div>
+      <div class="form-group"><label>Image URL</label><input type="url" id="pImage" class="form-input" placeholder="https://example.com/image.jpg"/></div>
+      <div class="form-group"><label>3D Model URL (GLB/GLTF)</label><input type="url" id="pModel" class="form-input" placeholder="https://example.com/model.glb"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="adminToast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
