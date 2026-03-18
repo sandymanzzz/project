@@ -38,7 +38,7 @@ app.get('*', (req, res) => {
 
 /* ── DATABASE & START ── */
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/forge3d';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://sandy:sandy2007@forge3d.ivyuu27.mongodb.net/?appName=forge3d';
 
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(async () => {
