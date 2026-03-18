@@ -3,7 +3,7 @@
 ───────────────────────────────────────── */
 
 const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:5000/api'
+  ? 'https://project-dsx7.onrender.com/api'
   : '/api';
 
 /* ── STATE ── */
